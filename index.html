@@ -1,0 +1,1333 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Prise de Service">
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#001E62">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<link rel="icon" sizes="192x192" href="./icon-192.png">
+<link rel="icon" sizes="512x512" href="./icon-512.png">
+
+<title>Prise de Service FMN</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --navy:#001E62; --navy2:#1565C0; --navyL:#DDEEFF;
+  --red:#E2001A;  --redL:#FFCDD2;
+  --grn:#1B5E20;  --grn2:#2E7D32; --grnL:#C8E6C9;
+  --teal:#004D40; --tealL:#B2DFDB;
+  --org:#E65100;  --orgL:#FFF3E0;
+  --gold:#F9A825; --goldL:#FFFDE7;
+  --g0:#F5F7FA;   --g1:#ECEFF1;   --g2:#CFD8DC;
+  --g3:#90A4AE;   --g4:#546E7A;   --g5:#37474F;
+}
+html,body{height:100%;font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;background:var(--g0);color:var(--g5);-webkit-font-smoothing:antialiased;font-size:15px}
+
+/* ── LAYOUT ── */
+#APP{display:flex;flex-direction:column;height:100vh;overflow:hidden}
+#HDR{flex-shrink:0;background:var(--navy);box-shadow:0 2px 12px rgba(0,30,98,.3)}
+.stripe{height:5px;background:var(--red)}
+.hdr-row{display:flex;align-items:center;gap:12px;padding:11px 15px}
+.hdr-ico{width:40px;height:40px;background:var(--red);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:21px;flex-shrink:0}
+.hdr-t h1{font-size:16px;font-weight:700;color:#fff}
+.hdr-t p{font-size:10px;color:rgba(255,255,255,.5);margin-top:1px}
+.hdr-right{margin-left:auto;display:flex;gap:8px}
+.ibtn{width:36px;height:36px;border:none;background:rgba(255,255,255,.13);border-radius:8px;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.ibtn:active{background:rgba(255,255,255,.28)}
+
+/* ── TABS ── */
+#TABS{display:flex;background:var(--navy);border-bottom:3px solid var(--red)}
+.tab{flex:1;padding:10px 4px;border:none;background:transparent;color:rgba(255,255,255,.4);font-size:13px;font-weight:700;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-3px;text-align:center;transition:color .2s}
+.tab.on{color:#fff;border-bottom-color:var(--red)}
+
+/* ── VIEWS ── */
+#VIEWS{flex:1;overflow:hidden;position:relative}
+.view{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:13px 12px 115px;display:none}
+.view.on{display:block}
+
+/* ── SECTION ── */
+.sec{background:#fff;border-radius:14px;margin-bottom:12px;overflow:hidden;border:1px solid var(--g1);box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.sec-h{display:flex;align-items:center;gap:9px;padding:10px 13px;background:var(--g0);border-bottom:1px solid var(--g1)}
+.sec-n{width:22px;height:22px;border-radius:50%;background:var(--navy);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sec-ti{font-size:11px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.5px}
+
+/* ── ROW ── */
+.row{display:flex;align-items:center;gap:10px;padding:10px 13px;border-bottom:1px solid var(--g1);min-height:50px}
+.row:last-child{border-bottom:none}
+.row-l{display:flex;align-items:center;gap:9px;flex:1;min-width:0}
+.lbl{font-size:13px;font-weight:600;color:var(--g5);line-height:1.2}
+.sub{font-size:10px;color:var(--g3);margin-top:2px}
+.row-r{flex-shrink:0;display:flex;align-items:center;gap:6px}
+.row-full{flex-direction:column;align-items:flex-start;gap:8px}
+
+/* ── VOYANT ── */
+.voy{width:13px;height:13px;border-radius:50%;background:var(--g2);flex-shrink:0;transition:background .2s,box-shadow .15s}
+
+/* ── INPUTS ── */
+input,select,textarea{
+  font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;
+  font-size:14px;color:var(--g5);
+  background:var(--g0);border:1.5px solid var(--g2);
+  border-radius:8px;padding:8px 10px;outline:none;
+  -webkit-appearance:none;appearance:none;
+  transition:border-color .2s,background .2s
+}
+input:focus,select:focus,textarea:focus{border-color:var(--navy2);background:#fff}
+input[type=text]{min-width:100px;max-width:140px}
+input[type=date]{min-width:135px}
+input[type=time]{min-width:90px}
+textarea{width:100%;min-height:70px;resize:vertical;line-height:1.5}
+select{
+  min-width:120px;padding-right:28px;cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 5 5-5' fill='none' stroke='%2390A4AE' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 9px center
+}
+
+/* ── KVB GRID ── */
+.kvb{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:8px 13px 13px 34px}
+.kvb label{font-size:10px;font-weight:700;color:var(--g3);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px}
+
+/* ── SUBSEC LABEL ── */
+.subsec{font-size:10px;font-weight:700;color:var(--g3);text-transform:uppercase;letter-spacing:.5px;padding:7px 13px 5px 34px;background:var(--g0);border-bottom:1px solid var(--g1)}
+
+/* ── HD BOX ── */
+.hd-box{font-size:24px;font-weight:700;color:var(--navy);background:var(--navyL);border:2px solid var(--navy2);border-radius:9px;padding:6px 14px;letter-spacing:3px;min-width:88px;text-align:center;font-family:'Courier New',monospace}
+
+/* ── BANNER ── */
+.banner{display:flex;align-items:center;gap:8px;padding:10px 13px;margin:0 13px 10px;border-radius:8px;font-size:12px;font-weight:700;transition:background .2s,color .2s}
+
+/* ── ALERT ── */
+.alert{display:flex;align-items:flex-start;gap:7px;margin:4px 13px 10px;padding:10px 12px;border-radius:8px;font-size:12px;font-weight:600;line-height:1.4;border-left:3px solid}
+
+/* ── TS BLOCK ── */
+.ts-block{padding:10px 13px 12px 34px;border-bottom:1px solid var(--g1);display:flex;flex-direction:column;gap:8px}
+.ts-lbl{font-size:10px;font-weight:700;color:var(--g3);text-transform:uppercase;letter-spacing:.5px}
+.ts-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ts-hint{font-size:11px;color:var(--g3);font-style:italic;margin-top:2px}
+
+/* ── BUTTONS ── */
+.btn{display:flex;align-items:center;justify-content:center;gap:7px;border:none;border-radius:12px;font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;font-weight:700;cursor:pointer;transition:filter .15s,transform .1s;padding:13px 16px;font-size:14px;text-align:center}
+.btn:active{filter:brightness(.88);transform:scale(.97)}
+.btn-primary{background:var(--navy);color:#fff;width:100%;font-size:15px;padding:15px;box-shadow:0 4px 14px rgba(0,30,98,.3)}
+.btn-danger{background:var(--red);color:#fff;flex:1}
+.btn-sec{background:var(--g1);color:var(--g5);flex:1}
+.btn-teal{background:var(--teal);color:#fff;flex:1}
+.btn-sm{border:none;border-radius:8px;font-family:-apple-system,sans-serif;font-weight:700;cursor:pointer;padding:9px 13px;font-size:12px;transition:filter .15s;color:#fff}
+.btn-sm:active{filter:brightness(.85)}
+.btn-navy{background:var(--navy2)}
+.btn-green{background:var(--grn2)}
+
+/* ── BOTTOM ── */
+#BTM{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--g1);padding:11px 13px calc(11px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:8px;box-shadow:0 -3px 16px rgba(0,0,0,.1);z-index:50}
+.btm-row{display:flex;gap:8px}
+
+/* ── HIDDEN ── */
+.hidden{display:none!important}
+
+/* ── TOAST ── */
+#TOAST{position:fixed;top:76px;left:50%;transform:translateX(-50%) translateY(-10px);padding:10px 18px;border-radius:12px;font-size:13px;font-weight:700;z-index:999;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;white-space:nowrap;max-width:90vw;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,.2)}
+#TOAST.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── OVERLAY / SHEET ── */
+#OVL{position:fixed;inset:0;background:rgba(0,20,80,.5);z-index:200;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .25s;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+#OVL.on{opacity:1;pointer-events:all}
+.sheet{background:#fff;width:100%;border-radius:18px 18px 0 0;padding:6px 16px calc(18px + env(safe-area-inset-bottom));transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);max-height:80vh;overflow-y:auto}
+#OVL.on .sheet{transform:translateY(0)}
+.sh-handle{width:36px;height:4px;background:var(--g2);border-radius:2px;margin:9px auto 14px}
+.sh-title{font-size:17px;font-weight:700;color:var(--navy);margin-bottom:10px}
+.sh-body{font-size:13px;color:var(--g5);line-height:1.6;margin-bottom:4px}
+.sh-btns{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+
+/* ── HISTORY ── */
+.hist-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.hist-top h2{font-size:17px;font-weight:700;color:var(--navy)}
+.hist-cnt{background:var(--navy);color:#fff;border-radius:20px;padding:3px 11px;font-size:11px;font-weight:700}
+.card{background:#fff;border-radius:13px;margin-bottom:10px;overflow:hidden;border:1px solid var(--g1);box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.card-h{display:flex;align-items:center;justify-content:space-between;padding:10px 13px;background:var(--navy);color:#fff}
+.card-train{font-size:14px;font-weight:700;font-family:'Courier New',monospace}
+.card-date{font-size:11px;opacity:.6}
+.card-body{padding:11px 13px}
+.card-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px 12px}
+.ci label{font-size:10px;font-weight:700;color:var(--g3);text-transform:uppercase;display:block;margin-bottom:2px}
+.ci span{font-size:12px;font-weight:600;color:var(--g5)}
+.card-obs{margin-top:8px;padding-top:8px;border-top:1px solid var(--g1);font-size:11px;color:var(--g4);font-style:italic;line-height:1.4}
+.badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:700;text-transform:uppercase}
+.b-ok{background:var(--grnL);color:var(--grn)}
+.b-ko{background:var(--redL);color:var(--red)}
+.export-btn{width:100%;background:var(--teal);color:#fff;border:none;border-radius:10px;padding:12px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-family:-apple-system,sans-serif;margin-bottom:10px}
+.export-btn:active{filter:brightness(.85)}
+.empty{text-align:center;padding:50px 20px;color:var(--g3)}
+.empty .ei{font-size:48px;margin-bottom:10px}
+
+/* ── ERR ROW ── */
+.row.err{background:#fff4f4}
+.row.err .lbl{color:var(--red)}
+</style>
+</head>
+<body>
+<div id="APP">
+
+<!-- HEADER -->
+<div id="HDR">
+  <div class="stripe"></div>
+  <div class="hdr-row">
+    <div class="hdr-ico">🚄</div>
+    <div class="hdr-t">
+      <h1>Prise de Service</h1>
+      <p>FMN — Conducteur SNCF</p>
+    </div>
+    <div class="hdr-right">
+      <button class="ibtn" onclick="showHelp()" title="Aide">ℹ️</button>
+    </div>
+  </div>
+  <div id="TABS">
+    <button class="tab on" id="TAB-form" onclick="goTab('form')">📋 Formulaire</button>
+    <button class="tab"    id="TAB-hist" onclick="goTab('hist')">📊 Historique</button>
+  </div>
+</div>
+
+<!-- VIEWS -->
+<div id="VIEWS">
+
+  <!-- ══ FORMULAIRE ══ -->
+  <div id="V-form" class="view on">
+
+    <!-- 1. IDENTIFICATION -->
+    <div class="sec">
+      <div class="sec-h"><div class="sec-n">1</div><span class="sec-ti">Identification</span></div>
+      <div class="row" id="R-date">
+        <div class="row-l"><div class="voy" id="voy-date"></div><div class="lbl">Date</div></div>
+        <div class="row-r"><input type="date" id="F-date" onchange="onDate()"></div>
+      </div>
+      <div class="row">
+        <div class="row-l"><div class="voy" id="voy-jour"></div><div class="lbl">N° Journée</div></div>
+        <div class="row-r"><input type="text" id="F-jour" placeholder="ex: I130" maxlength="12" oninput="chgTxt('voy-jour',this)"></div>
+      </div>
+      <div class="row" id="R-train">
+        <div class="row-l"><div class="voy" id="voy-train"></div><div class="lbl">N° Train</div></div>
+        <div class="row-r"><input type="text" id="F-train" placeholder="ex: 795971" maxlength="12" oninput="chgTxt('voy-train',this)"></div>
+      </div>
+      <div class="row">
+        <div class="row-l"><div class="voy" id="voy-indice"></div><div class="lbl">Indice</div></div>
+        <div class="row-r"><input type="text" id="F-indice" placeholder="ex: 16" maxlength="8" oninput="chgTxt('voy-indice',this)"></div>
+      </div>
+    </div>
+
+    <!-- 2. OPÉRATION & COMPOSITION -->
+    <div class="sec">
+      <div class="sec-h"><div class="sec-n">2</div><span class="sec-ti">Opération & Composition</span></div>
+      <div class="row" id="R-op">
+        <div class="row-l"><div class="voy" id="voy-op"></div><div class="lbl">Opération</div></div>
+        <div class="row-r">
+          <select id="F-op" onchange="chgSel('voy-op',this,'any')">
+            <option value="">Choisir…</option>
+            <option>PC</option><option>RS</option><option>RSr</option><option>MS</option>
+          </select>
+        </div>
+      </div>
+      <div class="row" id="R-compo">
+        <div class="row-l"><div class="voy" id="voy-compo"></div>
+          <div><div class="lbl">Composition</div><div class="sub">US = 1 engin · UM = 2 engins</div></div>
+        </div>
+        <div class="row-r">
+          <select id="F-compo" onchange="onCompo(this)">
+            <option value="">Choisir…</option>
+            <option>US</option><option>UM</option>
+          </select>
+        </div>
+      </div>
+      <div class="row" id="R-nem1">
+        <div class="row-l"><div class="voy" id="voy-nem1"></div>
+          <div><div class="lbl" id="LBL-nem1">N°EM</div><div class="sub" id="SUB-nem1">Choisir la composition d'abord</div></div>
+        </div>
+        <div class="row-r"><input type="text" id="F-nem1" placeholder="N°EM Paris" maxlength="12" oninput="chgTxt('voy-nem1',this)"></div>
+      </div>
+      <div class="row hidden" id="R-nem2">
+        <div class="row-l"><div class="voy" id="voy-nem2"></div>
+          <div><div class="lbl">N°EM côté Province</div><div class="sub">UM — 2ᵉ engin moteur</div></div>
+        </div>
+        <div class="row-r"><input type="text" id="F-nem2" placeholder="N°EM Province" maxlength="12" oninput="chgTxt('voy-nem2',this)"></div>
+      </div>
+    </div>
+
+    <!-- 3. HORAIRES & LIEUX -->
+    <div class="sec">
+      <div class="sec-h"><div class="sec-n">3</div><span class="sec-ti">Horaires & Lieux</span></div>
+
+      <!-- Départ : date + heure séparés pour iOS Safari -->
+      <div class="row" id="R-dep">
+        <div class="row-l"><div class="voy" id="voy-dep"></div>
+          <div><div class="lbl">Départ Prévu</div><div class="sub">Date + heure → calcule HD</div></div>
+        </div>
+        <div class="row-r" style="flex-direction:column;align-items:flex-end;gap:5px">
+          <input type="date" id="F-dep-d" onchange="onDep()">
+          <input type="time" id="F-dep-h" onchange="onDep()" step="60">
+        </div>
+      </div>
+
+      <div class="row" id="R-ldep">
+        <div class="row-l"><div class="voy" id="voy-ldep"></div><div class="lbl">Lieu Départ</div></div>
+        <div class="row-r">
+          <select id="F-ldep" onchange="chgSel('voy-ldep',this,'any')">
+            <option value="">Choisir…</option>
+            <option>PE</option><option>PAN Z</option><option>PAN TR</option><option>PAN V</option><option>NSY FB</option><option>NSY FN</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Arrivée prévue -->
+      <div class="row">
+        <div class="row-l"><div class="voy" id="voy-arr"></div>
+          <div><div class="lbl">Arrivée Prévue</div><div class="sub">Date + heure</div></div>
+        </div>
+        <div class="row-r" style="flex-direction:column;align-items:flex-end;gap:5px">
+          <input type="date" id="F-arr-d" onchange="chgVoy('voy-arr','F-arr-d','F-arr-h')">
+          <input type="time" id="F-arr-h" onchange="chgVoy('voy-arr','F-arr-d','F-arr-h')" step="60">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="row-l"><div class="voy" id="voy-larr"></div><div class="lbl">Lieu Arrivée</div></div>
+        <div class="row-r">
+          <select id="F-larr" onchange="chgSel('voy-larr',this,'any')">
+            <option value="">Choisir…</option>
+            <option>PE</option><option>PAN Z</option><option>PAN TR</option><option>PAN V</option><option>NSY FB</option><option>NSY FN</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- HD affiché -->
+      <div class="row">
+        <div class="row-l"><div class="voy" id="voy-hd" style="background:var(--navy2)"></div>
+          <div><div class="lbl">HD — Heure de Départ</div><div class="sub" id="HD-sub">Auto depuis l'heure de départ</div></div>
+        </div>
+        <div class="row-r"><div class="hd-box" id="HD-box">--:--</div></div>
+      </div>
+    </div>
+
+    <!-- 4. PPE SOL -->
+    <div class="sec">
+      <div class="sec-h"><div class="sec-n">4</div><span class="sec-ti">PPE Sol</span></div>
+      <div class="row" id="R-ppesol">
+        <div class="row-l"><div class="voy" id="voy-ppesol"></div><div class="lbl">PPE Sol</div></div>
+        <div class="row-r">
+          <select id="F-ppesol" onchange="chgSel('voy-ppesol',this,'okko'); checkEfas()">
+            <option value="">Choisir…</option><option>OK</option><option>KO</option>
+          </select>
+        </div>
+      </div>
+      <div class="alert hidden" id="AL-efas" style="background:var(--redL);color:var(--red);border-color:var(--red)">
+        ⚠️ PPE Sol KO — EFAS HS ! Signaler immédiatement au PC.
+      </div>
+    </div>
+
+    <!-- 5. PPE BORD -->
+    <div class="sec">
+      <div class="sec-h"><div class="sec-n">5</div><span class="sec-ti">PPE Bord</span></div>
+      <div class="row" id="R-sigav">
+        <div class="row-l"><div class="voy" id="voy-sigav"></div><div class="lbl">Signalisation d'avant</div></div>
+        <div class="row-r">
+          <select id="F-sigav" onchange="chgSel('voy-sigav',this,'okko'); checkPPE()">
+            <option value="">Choisir…</option><option>OK</option><option>KO</option>
+          </select>
+        </div>
+      </div>
+      <div class="subsec">Dispositifs de sécurité</div>
+      <div class="kvb">
+        <div><label>VA</label>
+          <select id="F-va" onchange="chgSel('',this,'okko'); checkPPE()">
+            <option value="">—</option><option>OK</option><option>KO</option>
+          </select>
+        </div>
+        <div><label>KVB</label>
+          <select id="F-kvb" onchange="chgSel('',this,'okko'); checkPPE()">
+            <option value="">—</option><option>OK</option><option>KO</option>
+          </select>
+        </div>
+        <div><label>RST</label>
+          <select id="F-rst" onchange="chgSel('',this,'okko'); checkPPE()">
+            <option value="">—</option><option>OK</option><option>KO</option>
+          </select>
+        </div>
+      </div>
+      <div class="row" id="R-efas">
+        <div class="row-l"><div class="voy" id="voy-efas"></div><div class="lbl">EFAS Bord</div></div>
+        <div class="row-r">
+          <select id="F-efas" onchange="chgSel('voy-efas',this,'okko'); checkPPE()">
+            <option value="">Choisir…</option><option>OK</option><option>KO</option>
+          </select>
+        </div>
+      </div>
+      <div class="banner" id="BAN-ppe" style="background:var(--g1);color:var(--g3)">
+        <span style="font-size:8px;margin-right:2px">●</span>
+        <span id="BAN-ppe-t">PPE Bord — En attente</span>
+      </div>
+    </div>
+
+    <!-- 6. SERVICE TRAIN -->
+    <div class="sec">
+      <div class="sec-h"><div class="sec-n">6</div><span class="sec-ti">ST — Service Train</span></div>
+      <div class="row" id="R-portes">
+        <div class="row-l"><div class="voy" id="voy-portes"></div><div class="lbl">Portes</div></div>
+        <div class="row-r">
+          <select id="F-portes" onchange="chgSel('voy-portes',this,'okko'); checkST()">
+            <option value="">Choisir…</option><option>OK</option><option>KO</option>
+          </select>
+        </div>
+      </div>
+      <div class="row" id="R-ordres">
+        <div class="row-l"><div class="voy" id="voy-ordres"></div><div class="lbl">Remise d'ordres</div></div>
+        <div class="row-r">
+          <select id="F-ordres" onchange="chgSel('voy-ordres',this,'okko'); checkST()">
+            <option value="">Choisir…</option><option>OK</option><option>KO</option>
+          </select>
+        </div>
+      </div>
+      <div class="row" id="R-annonce">
+        <div class="row-l"><div class="voy" id="voy-annonce"></div><div class="lbl">Annonce</div></div>
+        <div class="row-r">
+          <select id="F-annonce" onchange="chgSel('voy-annonce',this,'okko'); checkST()">
+            <option value="">Choisir…</option><option>OK</option><option>KO</option>
+          </select>
+        </div>
+      </div>
+      <div class="banner" id="BAN-st" style="background:var(--g1);color:var(--g3)">
+        <span style="font-size:8px;margin-right:2px">●</span>
+        <span id="BAN-st-t">ST — En attente</span>
+      </div>
+    </div>
+
+    <!-- 7. AuM -->
+    <div class="sec">
+      <div class="sec-h"><div class="sec-n">7</div><span class="sec-ti">AuM — Autorisation de Mouvement</span></div>
+      <div class="row" id="R-aum">
+        <div class="row-l"><div class="voy" id="voy-aum"></div><div class="lbl">Type d'AuM</div></div>
+        <div class="row-r">
+          <select id="F-aum" onchange="chgSel('voy-aum',this,'any')">
+            <option value="">Choisir…</option>
+            <option>AuM Signal</option><option>AuM Lili</option><option>AuM Verbal</option><option>AuM Écrit</option><option>AuM à Main</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- 8. SIRIUS & VAE -->
+    <div class="sec">
+      <div class="sec-h"><div class="sec-n">8</div><span class="sec-ti">SIRIUS & VAE</span></div>
+      <div class="row" id="R-smc">
+        <div class="row-l"><div class="voy" id="voy-smc"></div><div class="lbl">SIRIUS Mode Conduite</div></div>
+        <div class="row-r">
+          <select id="F-smc" onchange="chgSel('voy-smc',this,'ouinon')">
+            <option value="">Choisir…</option><option>Oui</option><option>Non</option>
+          </select>
+        </div>
+      </div>
+      <div class="row" id="R-sad">
+        <div class="row-l"><div class="voy" id="voy-sad"></div><div class="lbl">SIRIUS Adhérence Dégradée</div></div>
+        <div class="row-r">
+          <select id="F-sad" onchange="chgSel('voy-sad',this,'ouinon'); checkSiriusAD()">
+            <option value="">Choisir…</option><option>Oui</option><option>Non</option>
+          </select>
+        </div>
+      </div>
+      <div class="alert hidden" id="AL-sirius" style="background:var(--orgL);color:var(--org);border-color:var(--org)">
+        ⚠️ Adhérence Dégradée — Mesures FMN. Réduire vitesse. Signaler au régulateur.
+      </div>
+      <div class="row" id="R-vae">
+        <div class="row-l"><div class="voy" id="voy-vae"></div>
+          <div><div class="lbl">VAE</div><div class="sub" id="VAE-ts-txt">Non horodatée</div></div>
+        </div>
+        <div class="row-r">
+          <select id="F-vae" onchange="chgSel('voy-vae',this,'ouinon'); onVAE()">
+            <option value="">Choisir…</option><option>Oui</option><option>Non</option>
+          </select>
+        </div>
+      </div>
+      <!-- Horodatage VAE — visible uniquement si VAE=Oui, ne bloque PAS la validation -->
+      <div class="ts-block hidden" id="VAE-ts-block">
+        <div class="ts-lbl">⏱️ Horodatage VAE <span style="font-weight:400;text-transform:none;font-style:italic;color:var(--g3)">(optionnel)</span></div>
+        <div class="ts-row">
+          <button class="btn-sm btn-navy" onclick="tsAuto('VAE')">⏱️ Auto</button>
+          <input type="date" id="F-vae-d" style="min-width:130px" onchange="tsPreview('VAE')">
+          <input type="time" id="F-vae-h" style="min-width:85px" onchange="tsPreview('VAE')" step="60">
+          <button class="btn-sm btn-green" onclick="tsApply('VAE')">✅ Appliquer</button>
+        </div>
+        <div class="ts-hint" id="VAE-ts-hint">Saisir l'heure exacte de la VAE</div>
+      </div>
+      <div class="alert hidden" id="AL-oae" style="background:var(--tealL);color:var(--teal);border-color:var(--teal)">
+        ✅ OAE — Ordre d'Arrêt d'Exception applicable. Notifier l'agent-circulation.
+      </div>
+    </div>
+
+    <!-- 9. ARRIVÉE EFFECTIVE & OBSERVATIONS -->
+    <div class="sec">
+      <div class="sec-h"><div class="sec-n">9</div><span class="sec-ti">Arrivée Effective & Observations</span></div>
+      <div class="row">
+        <div class="row-l"><div class="voy" id="voy-arreff"></div>
+          <div><div class="lbl">Arrivée Effective</div><div class="sub" id="ARR-ts-txt">Non horodatée</div></div>
+        </div>
+        <div class="row-r"><button class="btn-sm btn-navy" onclick="tsAuto('ARR')">⏱️ Auto</button></div>
+      </div>
+      <div class="ts-block">
+        <div class="ts-lbl">✏️ Saisie manuelle</div>
+        <div class="ts-row">
+          <input type="date" id="F-arr-ts-d" style="min-width:130px" onchange="tsPreview('ARR')">
+          <input type="time" id="F-arr-ts-h" style="min-width:85px" onchange="tsPreview('ARR')" step="60">
+          <button class="btn-sm btn-green" onclick="tsApply('ARR')">✅ Appliquer</button>
+        </div>
+        <div class="ts-hint" id="ARR-ts-hint">Heure d'arrivée effective (optionnel)</div>
+      </div>
+      <div class="row row-full">
+        <div class="lbl">📝 Observations</div>
+        <textarea id="F-obs" placeholder="Saisir vos observations…"></textarea>
+      </div>
+    </div>
+
+    <!-- 10. REX & DOC ADC -->
+    <div class="sec">
+      <div class="sec-h"><div class="sec-n">10</div><span class="sec-ti">REX & Document ADC</span></div>
+      <div class="row">
+        <div class="row-l"><div class="voy" id="voy-rex"></div><div class="lbl">REX</div></div>
+        <div class="row-r">
+          <select id="F-rex" onchange="chgSel('voy-rex',this,'any'); checkRex()">
+            <option value="">Choisir…</option><option>Oui</option><option>Non</option>
+          </select>
+        </div>
+      </div>
+      <div class="alert hidden" id="AL-rex" style="background:#E3F2FD;color:#0D47A1;border-color:#1976D2">
+        📎 REX activé — Joindre pièce justificative.
+      </div>
+      <div class="row">
+        <div class="row-l"><div class="voy" id="voy-docadc"></div><div class="lbl">Document ADC émarginé</div></div>
+        <div class="row-r">
+          <select id="F-docadc" onchange="chgSel('voy-docadc',this,'any'); checkDocADC()">
+            <option value="">Choisir…</option><option>Oui</option><option>Non</option>
+          </select>
+        </div>
+      </div>
+      <div class="row hidden" id="R-docnum">
+        <div class="row-l"><div class="voy" id="voy-docnum"></div><div class="lbl">N° Document émarginé</div></div>
+        <div class="row-r"><input type="text" id="F-docnum" placeholder="Numéro" maxlength="20" oninput="chgTxt('voy-docnum',this)"></div>
+      </div>
+    </div>
+
+    <div style="height:8px"></div>
+  </div><!-- /V-form -->
+
+  <!-- ══ HISTORIQUE ══ -->
+  <div id="V-hist" class="view">
+    <div class="hist-top">
+      <h2>📊 Historique</h2>
+      <span class="hist-cnt" id="HIST-cnt">0 entrée</span>
+    </div>
+    <button class="export-btn" onclick="exportCSV()">📤 Exporter CSV</button>
+    <div id="HIST-list"></div>
+  </div>
+
+</div><!-- /VIEWS -->
+</div><!-- /APP -->
+
+<!-- BOTTOM BAR -->
+<div id="BTM">
+  <button class="btn btn-primary" onclick="valider()">✅  Valider et Enregistrer</button>
+  <div class="btm-row">
+    <button class="btn btn-danger" onclick="confirmReset()">🔄 Réinitialiser</button>
+    <button class="btn btn-teal" onclick="goTab('hist')">📊 Historique</button>
+  </div>
+</div>
+
+<!-- OVERLAY / SHEET -->
+<div id="OVL" onclick="ovlClick(event)">
+  <div class="sheet">
+    <div class="sh-handle"></div>
+    <div id="OVL-body"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="TOAST"></div>
+
+<script>
+// ═══════════════════════════════════
+//  ÉTAT GLOBAL
+// ═══════════════════════════════════
+var TS = { VAE: null, ARR: null };
+var STORE = 'pds_fmn_v5';
+var isUM  = false;
+
+// ═══════════════════════════════════
+//  INIT
+// ═══════════════════════════════════
+window.addEventListener('load', function() {
+  setDateToday('F-date');
+  setDateToday('F-dep-d');
+  voyOk('voy-date');
+  voyOk('voy-dep');
+  initStorage().then(function(){ updateCount(); });
+});
+
+
+// PWA: service worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('./service-worker.js').catch(function(){});
+  });
+}
+function setDateToday(id) {
+  var d = new Date();
+  var y = d.getFullYear();
+  var m = pad(d.getMonth() + 1);
+  var j = pad(d.getDate());
+  var el = document.getElementById(id);
+  if (el) el.value = y + '-' + m + '-' + j;
+}
+
+// ═══════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════
+function goTab(which) {
+  var isForm = which === 'form';
+  // tabs
+  setOn('TAB-form', isForm);
+  setOn('TAB-hist', !isForm);
+  // views
+  setOn('V-form', isForm);
+  setOn('V-hist', !isForm);
+  // bottom
+  document.getElementById('BTM').style.display = isForm ? 'flex' : 'none';
+  // render history
+  if (!isForm) renderHist();
+}
+
+function setOn(id, on) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  if (on) el.classList.add('on');
+  else     el.classList.remove('on');
+}
+
+// ═══════════════════════════════════
+//  VOYANTS — inline style (bulletproof iOS)
+// ═══════════════════════════════════
+function voyOk(id) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.style.background = '#2E7D32';
+  el.style.boxShadow  = '0 0 0 3px #C8E6C9';
+}
+function voyKo(id) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.style.background = '#E2001A';
+  el.style.boxShadow  = '0 0 0 3px #FFCDD2';
+}
+function voyGris(id) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.style.background = '#CFD8DC';
+  el.style.boxShadow  = 'none';
+}
+
+// ═══════════════════════════════════
+//  SÉLECT — couleur + voyant
+// ═══════════════════════════════════
+function chgSel(voyId, sel, mode) {
+  var v = sel.value;
+  // Couleur du select
+  sel.style.borderColor   = '';
+  sel.style.backgroundColor = '';
+  sel.style.color         = '';
+  sel.style.fontWeight    = '';
+  if (v === 'OK' || v === 'Oui') {
+    sel.style.borderColor     = '#2E7D32';
+    sel.style.backgroundColor = '#C8E6C9';
+    sel.style.color           = '#1B5E20';
+    sel.style.fontWeight      = '700';
+  } else if (v === 'KO' || v === 'Non') {
+    sel.style.borderColor     = '#E2001A';
+    sel.style.backgroundColor = '#FFCDD2';
+    sel.style.color           = '#B71C1C';
+    sel.style.fontWeight      = '700';
+  }
+  // Voyant
+  if (!voyId) return;
+  if (mode === 'okko') {
+    if (v === 'OK')    voyOk(voyId);
+    else if (v === 'KO') voyKo(voyId);
+    else                 voyGris(voyId);
+  } else if (mode === 'ouinon') {
+    if (v === 'Oui')   voyOk(voyId);
+    else if (v === 'Non') voyKo(voyId);
+    else                   voyGris(voyId);
+  } else { // 'any'
+    if (v !== '') voyOk(voyId);
+    else          voyGris(voyId);
+  }
+}
+
+// TEXT INPUT → voyant
+function chgTxt(voyId, input) {
+  if (input.value !== '') voyOk(voyId);
+  else                     voyGris(voyId);
+}
+
+// DATE PAIR → voyant (date + time)
+function chgVoy(voyId, dateId, timeId) {
+  var d = document.getElementById(dateId).value;
+  var h = timeId ? document.getElementById(timeId).value : '1';
+  if (d && h) voyOk(voyId);
+  else if (d || h) voyOk(voyId);
+  else voyGris(voyId);
+}
+
+// ═══════════════════════════════════
+//  DATE
+// ═══════════════════════════════════
+function onDate() {
+  var v = document.getElementById('F-date').value;
+  if (v) voyOk('voy-date'); else voyGris('voy-date');
+}
+
+// ═══════════════════════════════════
+//  DÉPART → HD
+// ═══════════════════════════════════
+function onDep() {
+  var d = document.getElementById('F-dep-d').value;
+  var h = document.getElementById('F-dep-h').value;
+  if (d) voyOk('voy-dep'); else voyGris('voy-dep');
+  if (h) {
+    document.getElementById('HD-box').textContent = h;
+    document.getElementById('HD-sub').textContent = 'HD = ' + h;
+    voyOk('voy-hd');
+  } else {
+    document.getElementById('HD-box').textContent = '--:--';
+    document.getElementById('HD-sub').textContent = 'Renseigner heure de départ';
+    document.getElementById('voy-hd').style.background = '#90A4AE';
+    document.getElementById('voy-hd').style.boxShadow = 'none';
+  }
+}
+
+// ═══════════════════════════════════
+//  COMPOSITION US / UM
+// ═══════════════════════════════════
+function onCompo(sel) {
+  chgSel('voy-compo', sel, 'any');
+  isUM = sel.value === 'UM';
+  var r2 = document.getElementById('R-nem2');
+  var l1 = document.getElementById('LBL-nem1');
+  var s1 = document.getElementById('SUB-nem1');
+
+  if (sel.value === 'US') {
+    r2.classList.add('hidden');
+    document.getElementById('F-nem2').value = '';
+    voyGris('voy-nem2');
+    l1.textContent = 'N°EM';
+    s1.textContent = 'US — engin moteur unique';
+    toast('Composition US — 1 seul N°EM', 'info');
+  } else if (sel.value === 'UM') {
+    r2.classList.remove('hidden');
+    l1.textContent = 'N°EM côté Paris';
+    s1.textContent = 'UM — 1er engin moteur';
+    toast('Composition UM — saisir 2 N°EM', 'info');
+  } else {
+    r2.classList.add('hidden');
+    l1.textContent = 'N°EM';
+    s1.textContent = "Choisir la composition d'abord";
+  }
+}
+
+// ═══════════════════════════════════
+//  PPE SOL
+// ═══════════════════════════════════
+function checkEfas() {
+  var v = document.getElementById('F-ppesol').value;
+  show('AL-efas', v === 'KO');
+}
+
+// ═══════════════════════════════════
+//  PPE BORD
+// ═══════════════════════════════════
+function checkPPE() {
+  var ids = ['F-sigav', 'F-va', 'F-kvb', 'F-rst', 'F-efas'];
+  var allOK = ids.every(function(id) {
+    return document.getElementById(id).value === 'OK';
+  });
+  var ban = document.getElementById('BAN-ppe');
+  var txt = document.getElementById('BAN-ppe-t');
+  if (allOK) {
+    ban.style.background = '#C8E6C9';
+    ban.style.color      = '#1B5E20';
+    txt.textContent      = '✅ PPE Bord — Conforme';
+  } else {
+    ban.style.background = '#FFCDD2';
+    ban.style.color      = '#E2001A';
+    txt.textContent      = '⚠️ PPE Bord — Vérification requise';
+  }
+}
+
+// ═══════════════════════════════════
+//  SERVICE TRAIN
+// ═══════════════════════════════════
+function checkST() {
+  var ids = ['F-portes', 'F-ordres', 'F-annonce'];
+  var allOK = ids.every(function(id) {
+    return document.getElementById(id).value === 'OK';
+  });
+  var ban = document.getElementById('BAN-st');
+  var txt = document.getElementById('BAN-st-t');
+  if (allOK) {
+    ban.style.background = '#C8E6C9';
+    ban.style.color      = '#1B5E20';
+    txt.textContent      = '✅ Service Train — Conforme';
+  } else {
+    ban.style.background = '#FFCDD2';
+    ban.style.color      = '#E2001A';
+    txt.textContent      = '⚠️ Service Train — Vérification requise';
+  }
+}
+
+// ═══════════════════════════════════
+//  SIRIUS AD
+// ═══════════════════════════════════
+function checkSiriusAD() {
+  show('AL-sirius', document.getElementById('F-sad').value === 'Oui');
+}
+
+// ═══════════════════════════════════
+//  VAE + HORODATAGE VAE
+// ═══════════════════════════════════
+function onVAE() {
+  var v = document.getElementById('F-vae').value;
+  show('AL-oae',       v === 'Oui');
+  show('VAE-ts-block', v === 'Oui');
+  if (v !== 'Oui') {
+    TS.VAE = null;
+    document.getElementById('VAE-ts-txt').textContent  = 'Non horodatée';
+    document.getElementById('VAE-ts-hint').textContent = "Saisir l'heure exacte de la VAE";
+    document.getElementById('VAE-ts-hint').style.color = '';
+  }
+}
+
+// ═══════════════════════════════════
+//  REX & DOC ADC
+// ═══════════════════════════════════
+function checkRex() {
+  show('AL-rex', document.getElementById('F-rex').value === 'Oui');
+}
+function checkDocADC() {
+  var v = document.getElementById('F-docadc').value;
+  show('R-docnum', v === 'Oui');
+  if (v !== 'Oui') {
+    document.getElementById('F-docnum').value = '';
+    voyGris('voy-docnum');
+  }
+}
+
+// ═══════════════════════════════════
+//  HORODATAGE GÉNÉRIQUE (VAE / ARR)
+// ═══════════════════════════════════
+function tsAuto(which) {
+  var now = new Date();
+  TS[which] = now;
+  var s = fmtDateTime(now);
+  // Sync champs
+  if (which === 'VAE') {
+    document.getElementById('F-vae-d').value = fmtDate(now);
+    document.getElementById('F-vae-h').value = fmtTime(now);
+    document.getElementById('VAE-ts-txt').textContent  = '⏱️ ' + s;
+    document.getElementById('VAE-ts-hint').textContent = '✅ ' + s;
+    document.getElementById('VAE-ts-hint').style.color = '#1B5E20';
+  } else {
+    document.getElementById('F-arr-ts-d').value = fmtDate(now);
+    document.getElementById('F-arr-ts-h').value = fmtTime(now);
+    document.getElementById('ARR-ts-txt').textContent  = '⏱️ ' + s;
+    document.getElementById('ARR-ts-hint').textContent = '✅ ' + s;
+    document.getElementById('ARR-ts-hint').style.color = '#1B5E20';
+    voyOk('voy-arreff');
+  }
+  toast('⏱️ ' + which + ' : ' + s, 'success');
+}
+
+function tsPreview(which) {
+  var dId = which === 'VAE' ? 'F-vae-d'    : 'F-arr-ts-d';
+  var hId = which === 'VAE' ? 'F-vae-h'    : 'F-arr-ts-h';
+  var hintId = which + '-ts-hint';
+  var d = document.getElementById(dId).value;
+  var h = document.getElementById(hId).value;
+  if (!d || !h) return;
+  var hint = document.getElementById(hintId);
+  hint.textContent = '→ ' + d.split('-').reverse().join('/') + ' ' + h + ' — tap Appliquer';
+  hint.style.color = '#E65100';
+}
+
+function tsApply(which) {
+  var dId = which === 'VAE' ? 'F-vae-d'    : 'F-arr-ts-d';
+  var hId = which === 'VAE' ? 'F-vae-h'    : 'F-arr-ts-h';
+  var txtId  = which + '-ts-txt';
+  var hintId = which + '-ts-hint';
+  var d = document.getElementById(dId).value;
+  var h = document.getElementById(hId).value;
+  if (!d || !h) { toast('⚠️ Saisir date et heure', 'error'); return; }
+  var dt = new Date(d + 'T' + h);
+  TS[which] = dt;
+  var s = fmtDateTime(dt);
+  document.getElementById(txtId).textContent  = '✏️ ' + s + ' (manuel)';
+  document.getElementById(hintId).textContent = '✅ ' + s;
+  document.getElementById(hintId).style.color = '#1B5E20';
+  if (which === 'ARR') voyOk('voy-arreff');
+  toast('✅ ' + which + ' : ' + s + ' appliqué', 'success');
+}
+
+// ═══════════════════════════════════
+//  VALIDER & ENREGISTRER
+// ═══════════════════════════════════
+function valider() {
+  // Nettoyage erreurs précédentes
+  document.querySelectorAll('.row.err').forEach(function(r) { r.classList.remove('err'); });
+
+  var depD = g('F-dep-d'), depH = g('F-dep-h');
+  var arrD = g('F-arr-d'), arrH = g('F-arr-h');
+
+  var champs = [
+    { id: 'R-date',   valFn: function() { return g('F-date') !== ''; },   lbl: 'Date' },
+    { id: 'R-train',  valFn: function() { return g('F-train') !== ''; },  lbl: 'N° Train' },
+    { id: 'R-op',     valFn: function() { return g('F-op') !== ''; },     lbl: 'Opération' },
+    { id: 'R-compo',  valFn: function() { return g('F-compo') !== ''; },  lbl: 'Composition' },
+    { id: 'R-nem1',   valFn: function() { return g('F-nem1') !== ''; },   lbl: 'N°EM' },
+    { id: 'R-dep',    valFn: function() { return depD !== '' && depH !== ''; }, lbl: 'Départ Prévu (date + heure)' },
+    { id: 'R-ldep',   valFn: function() { return g('F-ldep') !== ''; },   lbl: 'Lieu Départ' },
+    { id: 'R-ppesol', valFn: function() { return g('F-ppesol') !== ''; }, lbl: 'PPE Sol' },
+    { id: 'R-sigav',  valFn: function() { return g('F-sigav') !== ''; },  lbl: 'Signalisation avant' },
+    { id: null,       id2: 'F-va',  valFn: function() { return g('F-va') !== ''; },  lbl: 'VA' },
+    { id: null,       id2: 'F-kvb', valFn: function() { return g('F-kvb') !== ''; }, lbl: 'KVB' },
+    { id: null,       id2: 'F-rst', valFn: function() { return g('F-rst') !== ''; }, lbl: 'RST' },
+    { id: 'R-efas',   valFn: function() { return g('F-efas') !== ''; },   lbl: 'EFAS Bord' },
+    { id: 'R-portes', valFn: function() { return g('F-portes') !== ''; }, lbl: 'Portes' },
+    { id: 'R-ordres', valFn: function() { return g('F-ordres') !== ''; }, lbl: "Remise d'ordres" },
+    { id: 'R-annonce',valFn: function() { return g('F-annonce') !== ''; },lbl: 'Annonce' },
+    { id: 'R-aum',    valFn: function() { return g('F-aum') !== ''; },    lbl: 'AuM' },
+    { id: 'R-smc',    valFn: function() { return g('F-smc') !== ''; },    lbl: 'SIRIUS Mode Conduite' },
+    { id: 'R-sad',    valFn: function() { return g('F-sad') !== ''; },    lbl: 'SIRIUS Adhérence Dégradée' },
+    { id: 'R-vae',    valFn: function() { return g('F-vae') !== ''; },    lbl: 'VAE' },
+  ];
+
+  // N°EM Province requis en UM
+  if (isUM) {
+    champs.push({ id: 'R-nem2', valFn: function() { return g('F-nem2') !== ''; }, lbl: 'N°EM Province (UM)' });
+  }
+
+  var manquants = champs.filter(function(c) { return !c.valFn(); });
+
+  if (manquants.length > 0) {
+    manquants.forEach(function(c) {
+      var rowId = c.id || null;
+      if (rowId) {
+        var r = document.getElementById(rowId);
+        if (r) r.classList.add('err');
+      }
+    });
+    var noms = manquants.map(function(c) { return c.lbl; }).join(', ');
+    toast('⚠️ ' + manquants.length + ' champ(s) manquant(s) : ' + noms, 'error');
+    // Scroll vers le premier
+    var firstId = manquants[0].id || manquants[0].id2;
+    if (firstId) {
+      var el = document.getElementById(firstId);
+      if (el) setTimeout(function() { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 80);
+    }
+    return;
+  }
+
+  // ── Construire l'entrée ──
+  var entry = {
+    id:      Date.now(),
+    at:      new Date().toLocaleString('fr-FR'),
+    date:    g('F-date'),
+    journee: g('F-jour'),
+    train:   g('F-train'),
+    indice:  g('F-indice'),
+    op:      g('F-op'),
+    compo:   g('F-compo'),
+    nem1:    g('F-nem1'),
+    nem2:    g('F-nem2'),
+    depD:    depD, depH: depH,
+    ldep:    g('F-ldep'),
+    arrD:    arrD, arrH: arrH,
+    larr:    g('F-larr'),
+    hd:      depH,
+    ppesol:  g('F-ppesol'),
+    sigav:   g('F-sigav'),
+    va:      g('F-va'),
+    kvb:     g('F-kvb'),
+    rst:     g('F-rst'),
+    efas:    g('F-efas'),
+    portes:  g('F-portes'),
+    ordres:  g('F-ordres'),
+    annonce: g('F-annonce'),
+    aum:     g('F-aum'),
+    smc:     g('F-smc'),
+    sad:     g('F-sad'),
+    vae:     g('F-vae'),
+    vaeTs:   TS.VAE ? fmtDateTime(TS.VAE) : '',
+    arrEff:  TS.ARR ? fmtDateTime(TS.ARR) : '',
+    obs:     g('F-obs'),
+    rex:     g('F-rex'),
+    docadc:  g('F-docadc'),
+    docnum:  g('F-docnum'),
+  };
+
+  var hist = loadHist();
+  hist.unshift(entry);
+  saveHist(hist);
+  updateCount();
+
+  var d = new Date(entry.date);
+  var dStr = isNaN(d.getTime()) ? entry.date
+    : d.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+
+  showSheet('🎉 Enregistré !',
+    '<p><strong>Train ' + esc(entry.train) + '</strong><br>' + esc(dStr) + '<br>Enregistré à ' + entry.at + '</p>',
+    [
+      { lbl: 'Nouvelle saisie',     cls: 'btn btn-primary', fn: "closeSheet(); confirmReset()" },
+      { lbl: "Voir l'historique",   cls: 'btn btn-teal',    fn: "closeSheet(); goTab('hist')" },
+      { lbl: 'Rester sur le formulaire', cls: 'btn btn-sec', fn: 'closeSheet()' },
+    ]
+  );
+}
+
+// ═══════════════════════════════════
+//  RESET
+// ═══════════════════════════════════
+function confirmReset() {
+  showSheet('🔄 Réinitialiser ?',
+    '<p>Toutes les données du formulaire seront effacées.</p>',
+    [
+      { lbl: 'Oui, effacer', cls: 'btn btn-danger', fn: 'closeSheet(); doReset()' },
+      { lbl: 'Annuler',      cls: 'btn btn-sec',    fn: 'closeSheet()' },
+    ]
+  );
+}
+
+function doReset() {
+  // Selects
+  document.querySelectorAll('#V-form select').forEach(function(s) {
+    s.value = '';
+    s.style.borderColor = s.style.backgroundColor = s.style.color = s.style.fontWeight = '';
+  });
+  // Inputs texte
+  document.querySelectorAll('#V-form input[type=text]').forEach(function(i) { i.value = ''; });
+  // Date today
+  setDateToday('F-date');
+  setDateToday('F-dep-d');
+  // Heure
+  document.getElementById('F-dep-h').value = '';
+  document.getElementById('F-arr-d').value = '';
+  document.getElementById('F-arr-h').value = '';
+  // textarea
+  document.getElementById('F-obs').value = '';
+  // Timestamps
+  TS.VAE = null; TS.ARR = null;
+  document.getElementById('F-vae-d').value = '';
+  document.getElementById('F-vae-h').value = '';
+  document.getElementById('F-arr-ts-d').value = '';
+  document.getElementById('F-arr-ts-h').value = '';
+  document.getElementById('VAE-ts-txt').textContent  = 'Non horodatée';
+  document.getElementById('VAE-ts-hint').textContent = "Saisir l'heure exacte de la VAE";
+  document.getElementById('VAE-ts-hint').style.color = '';
+  document.getElementById('ARR-ts-txt').textContent  = 'Non horodatée';
+  document.getElementById('ARR-ts-hint').textContent = "Heure d'arrivée effective (optionnel)";
+  document.getElementById('ARR-ts-hint').style.color = '';
+  // HD
+  document.getElementById('HD-box').textContent = '--:--';
+  document.getElementById('HD-sub').textContent = 'Auto depuis l\'heure de départ';
+  // Voyants
+  var voyIds = ['voy-date','voy-jour','voy-train','voy-indice','voy-op','voy-compo',
+    'voy-nem1','voy-nem2','voy-dep','voy-ldep','voy-arr','voy-larr',
+    'voy-ppesol','voy-sigav','voy-efas','voy-portes','voy-ordres','voy-annonce',
+    'voy-aum','voy-smc','voy-sad','voy-vae','voy-arreff','voy-rex','voy-docadc','voy-docnum'];
+  voyIds.forEach(function(id) { voyGris(id); });
+  // Date toujours ok
+  voyOk('voy-date'); voyOk('voy-dep');
+  // Banners
+  setBanner('BAN-ppe', 'PPE Bord — En attente', false);
+  setBanner('BAN-st',  'ST — En attente', false);
+  // Alertes
+  ['AL-efas','AL-sirius','AL-oae','AL-rex'].forEach(function(id) { show(id, false); });
+  // Lignes dynamiques
+  show('R-nem2',    false);
+  show('R-docnum',  false);
+  show('VAE-ts-block', false);
+  // Labels NEM1
+  document.getElementById('LBL-nem1').textContent = 'N°EM';
+  document.getElementById('SUB-nem1').textContent = "Choisir la composition d'abord";
+  // Erreurs
+  document.querySelectorAll('.row.err').forEach(function(r) { r.classList.remove('err'); });
+  isUM = false;
+  // Scroll top
+  document.getElementById('V-form').scrollTop = 0;
+  toast('✅ Formulaire réinitialisé', 'success');
+}
+
+function setBanner(id, txt, ok) {
+  var b = document.getElementById(id);
+  var t = document.getElementById(id + '-t');
+  b.style.background = ok ? '#C8E6C9' : '#ECEFF1';
+  b.style.color      = ok ? '#1B5E20' : '#90A4AE';
+  t.textContent      = txt;
+}
+
+// ═══════════════════════════════════
+//  HISTORIQUE
+// ═══════════════════════════════════
+function renderHist() {
+  var hist = loadHist();
+  updateCount();
+  var el = document.getElementById('HIST-list');
+  if (!hist.length) {
+    el.innerHTML = '<div class="empty"><div class="ei">📋</div><p>Aucune prise de service enregistrée.</p></div>';
+    return;
+  }
+  el.innerHTML = hist.map(function(e) {
+    var ppeOK = e.sigav==='OK' && e.va==='OK' && e.kvb==='OK' && e.rst==='OK' && e.efas==='OK';
+    var stOK  = e.portes==='OK' && e.ordres==='OK' && e.annonce==='OK';
+    var d = new Date(e.date);
+    var ds = isNaN(d.getTime()) ? (e.date||'')
+      : d.toLocaleDateString('fr-FR', { weekday:'short', day:'numeric', month:'short', year:'numeric' });
+    return (
+      '<div class="card">' +
+        '<div class="card-h"><span class="card-train">🚄 ' + esc(e.train||'—') + '</span><span class="card-date">' + esc(ds) + '</span></div>' +
+        '<div class="card-body">' +
+          '<div class="card-grid">' +
+            ci('Journée', e.journee) +
+            ci('Opération', e.op) +
+            ci('Composition', e.compo) +
+            ci('HD', e.hd) +
+            ci('N°EM 1 (Paris)', e.nem1) +
+            ci('N°EM 2 (Province)', e.nem2||'—') +
+            ci('Lieu Départ', e.ldep) +
+            ci('Lieu Arrivée', e.larr||'—') +
+            ci('Départ', e.depH ? (e.depD ? e.depD.split('-').reverse().join('/') + ' ' : '') + e.depH : '—') +
+            ci('Arrivée Prévue', e.arrH ? (e.arrD ? e.arrD.split('-').reverse().join('/') + ' ' : '') + e.arrH : '—') +
+            ci('Arrivée Effective', e.arrEff||'—') +
+            ci('AuM', e.aum) +
+            ci('VAE', e.vae) +
+            ci('Heure VAE', e.vaeTs||'—') +
+            ci('SIRIUS MC', e.smc) +
+            ci('SIRIUS AD', e.sad) +
+            ci('REX', e.rex||'—') +
+            '<div class="ci"><label>PPE Bord</label><span>' + bx(ppeOK ? 'OK' : 'KO') + '</span></div>' +
+            '<div class="ci"><label>Service Train</label><span>' + bx(stOK ? 'OK' : 'KO') + '</span></div>' +
+          '</div>' +
+          (e.obs ? '<div class="card-obs">💬 ' + esc(e.obs) + '</div>' : '') +
+          '<div style="margin-top:7px;font-size:10px;color:#90A4AE">Enregistré le ' + esc(e.at) + '</div>' +
+        '</div>' +
+      '</div>'
+    );
+  }).join('');
+}
+
+function ci(label, val) {
+  return '<div class="ci"><label>' + label + '</label><span>' + esc(val || '—') + '</span></div>';
+}
+function bx(v) {
+  if (v === 'OK' || v === 'Oui') return '<span class="badge b-ok">' + v + '</span>';
+  if (v === 'KO' || v === 'Non') return '<span class="badge b-ko">' + v + '</span>';
+  return '<span>' + esc(v) + '</span>';
+}
+function updateCount() {
+  var n = loadHist().length;
+  document.getElementById('HIST-cnt').textContent = n + ' entrée' + (n > 1 ? 's' : '');
+}
+
+// ═══════════════════════════════════
+//  EXPORT CSV
+// ═══════════════════════════════════
+async function exportCSV() {
+  var hist = loadHist();
+  if (!hist.length) { toast('Aucune donnée à exporter', 'error'); return; }
+
+  var hd = ['Date','Journée','Train','Indice','Opération','Compo','N°EM Paris','N°EM Province',
+    'Date Départ','Heure Départ','HD','Lieu Départ','Date Arrivée','Heure Arrivée','Lieu Arrivée',
+    'Arrivée Effective','PPE Sol','Sig Avant','VA','KVB','RST','EFAS',
+    'Portes','Remise Ordres','Annonce','AuM','SIRIUS MC','SIRIUS AD','VAE','Heure VAE',
+    'Observations','REX','DocADC','N° Doc','Enregistré le'];
+
+  var rows = [hd.join(';')];
+  hist.forEach(function(e) {
+    var row = [
+      e.date, e.journee, e.train, e.indice, e.op, e.compo, e.nem1, e.nem2||'',
+      e.depD, e.depH, e.hd, e.ldep, e.arrD||'', e.arrH||'', e.larr||'',
+      e.arrEff||'', e.ppesol, e.sigav, e.va, e.kvb, e.rst, e.efas,
+      e.portes, e.ordres, e.annonce, e.aum, e.smc, e.sad, e.vae, e.vaeTs||'',
+      (e.obs||'').replace(/;/g,','), e.rex||'', e.docadc||'', e.docnum||'', e.at
+    ].map(function(v) { return '"' + String(v||'').replace(/"/g,'""') + '"'; });
+    rows.push(row.join(';'));
+  });
+
+  var filename = 'pds_fmn_' + fmtDate(new Date()).replace(/-/g,'') + '.csv';
+  var blob = new Blob(['\uFEFF' + rows.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+
+  // iOS / PWA friendly: partage si possible
+  try {
+    var file = new File([blob], filename, { type: blob.type });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: filename });
+      toast('✅ CSV partagé', 'success');
+      return;
+    }
+  } catch(e) {}
+
+  // Fallback: ouvrir le CSV dans un nouvel onglet
+  var url = URL.createObjectURL(blob);
+  window.open(url, '_blank');
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 10000);
+  toast('✅ CSV ouvert', 'success');
+}
+
+// ═══════════════════════════════════
+//  STORAGE
+// ═══════════════════════════════════
+var HIST_CACHE = [];
+var _fallback = []; // mémoire si stockage indisponible
+
+// IndexedDB (PWA-friendly)
+var _dbp = null;
+function dbOpen() {
+  if (_dbp) return _dbp;
+  _dbp = new Promise(function(resolve, reject) {
+    if (!('indexedDB' in window)) return reject(new Error('indexedDB absent'));
+    var req = indexedDB.open('pds_fmn_db', 1);
+    req.onupgradeneeded = function() {
+      var db = req.result;
+      if (!db.objectStoreNames.contains('kv')) db.createObjectStore('kv', { keyPath: 'k' });
+    };
+    req.onsuccess = function() { resolve(req.result); };
+    req.onerror = function() { reject(req.error || new Error('indexedDB open error')); };
+  });
+  return _dbp;
+}
+function dbGet(key) {
+  return dbOpen().then(function(db) {
+    return new Promise(function(resolve, reject) {
+      var tx = db.transaction('kv', 'readonly');
+      var st = tx.objectStore('kv');
+      var rq = st.get(key);
+      rq.onsuccess = function() { resolve(rq.result ? rq.result.v : null); };
+      rq.onerror = function() { reject(rq.error); };
+    });
+  });
+}
+function dbSet(key, val) {
+  return dbOpen().then(function(db) {
+    return new Promise(function(resolve, reject) {
+      var tx = db.transaction('kv', 'readwrite');
+      tx.oncomplete = function() { resolve(true); };
+      tx.onerror = function() { reject(tx.error); };
+      tx.objectStore('kv').put({ k: key, v: val });
+    });
+  });
+}
+function initStorage() {
+  // 1) tente IndexedDB
+  return dbGet('hist').then(function(v) {
+    HIST_CACHE = Array.isArray(v) ? v : [];
+    return true;
+  }).catch(function() {
+    // 2) fallback localStorage (au cas où)
+    try {
+      HIST_CACHE = JSON.parse(localStorage.getItem(STORE) || '[]');
+      return true;
+    } catch(e) {
+      HIST_CACHE = _fallback;
+      return false;
+    }
+  });
+}
+function persistHist(arr) {
+  HIST_CACHE = arr;
+  // IndexedDB en priorité
+  dbSet('hist', arr).catch(function() {
+    // fallback localStorage
+    try { localStorage.setItem(STORE, JSON.stringify(arr)); }
+    catch(e) { _fallback = arr; }
+  });
+}
+function loadHist() { return HIST_CACHE || []; }
+function saveHist(arr) { persistHist(arr); }
+
+// ═══════════════════════════════════
+//  MODAL / SHEET
+// ═══════════════════════════════════
+function showSheet(title, body, btns) {
+  var html = '<div class="sh-title">' + title + '</div><div class="sh-body">' + body + '</div>' +
+    '<div class="sh-btns">' + btns.map(function(b) {
+      return '<button class="' + b.cls + '" onclick="' + b.fn + '">' + b.lbl + '</button>';
+    }).join('') + '</div>';
+  document.getElementById('OVL-body').innerHTML = html;
+  document.getElementById('OVL').classList.add('on');
+}
+function closeSheet() { document.getElementById('OVL').classList.remove('on'); }
+function ovlClick(e) { if (e.target.id === 'OVL') closeSheet(); }
+
+// ═══════════════════════════════════
+//  AIDE
+// ═══════════════════════════════════
+function showHelp() {
+  showSheet('ℹ️ Aide',
+    '<p><strong>Voyants :</strong><br>🟢 Vert = OK &nbsp; 🔴 Rouge = KO &nbsp; ⚫ Gris = non renseigné</p>' +
+    '<p style="margin-top:10px"><strong>HD</strong> = heure extraite automatiquement du champ Heure de Départ.</p>' +
+    '<p style="margin-top:10px"><strong>Composition UM</strong> = 2 champs N°EM s\'affichent (Paris + Province).</p>' +
+    '<p style="margin-top:10px"><strong>Horodatage :</strong><br>⏱️ Auto = heure actuelle<br>✏️ Manuel = saisir date/heure + Appliquer</p>' +
+    '<p style="margin-top:10px"><strong>Installer comme appli :</strong><br>Safari → Partager → « Sur l\'écran d\'accueil »</p>',
+    [{ lbl: 'Fermer', cls: 'btn btn-sec', fn: 'closeSheet()' }]
+  );
+}
+
+// ═══════════════════════════════════
+//  UTILS
+// ═══════════════════════════════════
+function g(id) { var e = document.getElementById(id); return e ? e.value : ''; }
+
+function show(id, visible) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  if (visible) el.classList.remove('hidden');
+  else          el.classList.add('hidden');
+}
+
+function pad(n) { return n < 10 ? '0' + n : '' + n; }
+function fmtDate(d) {
+  return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+}
+function fmtTime(d) {
+  return pad(d.getHours()) + ':' + pad(d.getMinutes());
+}
+function fmtDateTime(d) {
+  return pad(d.getDate()) + '/' + pad(d.getMonth()+1) + '/' + d.getFullYear() + ' ' + fmtTime(d);
+}
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ═══════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════
+var _tt;
+function toast(msg, type) {
+  var el = document.getElementById('TOAST');
+  el.textContent = msg;
+  // couleurs
+  el.style.background = type === 'success' ? '#2E7D32'
+                      : type === 'error'   ? '#E2001A'
+                      : '#1565C0';
+  el.style.color = '#fff';
+  clearTimeout(_tt);
+  el.classList.add('on');
+  _tt = setTimeout(function() { el.classList.remove('on'); }, 3500);
+}
+</script>
+</body>
+</html>
